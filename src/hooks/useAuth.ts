@@ -46,6 +46,7 @@ export function useAuth() {
     await supabase.auth.signOut()
     setUser(null)
     setProfile(null)
+    window.location.href = '/login'
   }
 
   return { user, profile, loading, signOut }
