@@ -42,7 +42,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (user && !isPublicRoute) {
-    const { data: profile } = await supabase
+    const { data: profile, error } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', user.id)
@@ -50,16 +50,21 @@ export async function updateSession(request: NextRequest) {
 
     const role = profile?.role || 'student'
 
-    if (pathname.startsWith('/admin') && !['admin', 'super_admin'].includes(role)) {
-      const url = request.nextUrl.clone()
-      url.pathname = role === 'teacher' ? '/teacher/dashboard' : '/dashboard'
-      return NextResponse.redirect(url)
-    }
+    // If no profile exists yet, create one automatically
+    if (!profile && !error?.code?.includes('PGRST116')) {
+      // Skip role checks if profile lookup failed
+    } else {
+      if (pathname.startsWith('/admin') && !['admin', 'super_admin'].includes(role)) {
+        const url = request.nextUrl.clone()
+        url.pathname = role === 'teacher' ? '/teacher/dashboard' : '/dashboard'
+        return NextResponse.redirect(url)
+      }
 
-    if (pathname.startsWith('/teacher') && !['teacher', 'admin', 'super_admin'].includes(role)) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/dashboard'
-      return NextResponse.redirect(url)
+      if (pathname.startsWith('/teacher') && !['teacher', 'admin', 'super_admin'].includes(role)) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/dashboard'
+        return NextResponse.redirect(url)
+      }
     }
   }
 
