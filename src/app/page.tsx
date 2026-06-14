@@ -6,7 +6,7 @@ import {
   Gamepad2, Star, BookOpen, Brain, Video, Users, Globe, Shield,
   Sparkles, Trophy, ChevronDown, ArrowRight, Check, Zap, Award,
   BarChart3, Headphones, MessageCircle, GraduationCap, Heart,
-  Mail, Phone, MapPin, Facebook, Instagram, Youtube, Twitter
+  Mail, Phone, MapPin, Facebook, Instagram, Play, Twitter
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -581,7 +581,7 @@ export default function LandingPage() {
                   <Instagram className="h-4 w-4" />
                 </a>
                 <a href="#" className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
-                  <Youtube className="h-4 w-4" />
+                  <Play className="h-4 w-4" />
                 </a>
                 <a href="#" className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
                   <Twitter className="h-4 w-4" />
