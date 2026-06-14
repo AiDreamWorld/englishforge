@@ -7,8 +7,16 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner'
-import { Plus, Trash2, Award } from 'lucide-react'
+import { Plus, Trash2, Award, Lightbulb } from 'lucide-react'
 import { toast } from 'sonner'
+
+const TIPS = [
+  'Badges reward students for achievements like streaks, level-ups, and quiz mastery.',
+  'Rarity levels (common → legendary) make rare badges feel special and motivate students.',
+  'Create streak badges (7-day, 30-day, 100-day) to encourage daily practice.',
+  'Category helps organize badges — use "quiz" for quiz milestones, "level" for level-ups.',
+  'Students see earned badges on their dashboard profile — it boosts engagement!',
+]
 
 interface BadgeItem {
   id: string
@@ -55,6 +63,8 @@ export default function AdminBadgesPage() {
     toast.success('Deleted')
   }
 
+  const [tip] = useState(TIPS[Math.floor(Math.random() * TIPS.length)])
+
   if (loading) return <LoadingSpinner />
 
   return (
@@ -62,6 +72,11 @@ export default function AdminBadgesPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold font-display">Badges ({badges.length})</h1>
         <Button onClick={() => setShowForm(!showForm)}><Plus size={16} className="mr-2" /> New Badge</Button>
+      </div>
+
+      <div className="flex items-start gap-3 bg-orange-50 border border-orange-200 rounded-xl p-4">
+        <Lightbulb className="h-5 w-5 text-orange-500 flex-shrink-0 mt-0.5" />
+        <p className="text-sm text-orange-700">{tip}</p>
       </div>
 
       {showForm && (
