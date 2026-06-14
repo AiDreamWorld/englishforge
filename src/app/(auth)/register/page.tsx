@@ -109,7 +109,7 @@ export default function RegisterPage() {
     }
 
     toast.success('Account created! Let\'s get started!')
-    router.push('/dashboard')
+    router.push(data.role === 'student' ? '/onboarding' : '/teacher/dashboard')
     router.refresh()
   }
 
