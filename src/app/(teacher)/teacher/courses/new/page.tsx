@@ -31,7 +31,7 @@ export default function NewCoursePage() {
 
     const slug = form.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 
-    const { error } = await supabase.from('courses').insert({
+    const { data, error } = await supabase.from('courses').insert({
       title: form.title,
       slug: `${slug}-${Date.now().toString(36)}`,
       description: form.description,
@@ -41,11 +41,11 @@ export default function NewCoursePage() {
       age_group: [form.age_group],
       teacher_id: user.id,
       status: 'draft',
-    })
+    }).select().single()
 
     if (error) { toast.error('Failed to create course'); setSaving(false); return }
-    toast.success('Course created!')
-    router.push('/teacher/courses')
+    toast.success('Course created! Opening Course Builder...')
+    router.push(`/teacher/courses/${data.id}/edit`)
   }
 
   return (
