@@ -32,6 +32,7 @@ interface CourseData {
   skills: string[]
   tags: string[]
   teacher: { full_name: string; avatar_url: string | null } | null
+  meta: { benefits?: string; requirements?: string; target_audience?: string; materials?: string } | null
 }
 
 interface LessonItem {
@@ -238,6 +239,36 @@ export default function CourseDetailPage() {
           </div>
         </div>
       </motion.div>
+
+      {/* Course Meta Info */}
+      {course.meta && (course.meta.benefits || course.meta.requirements || course.meta.target_audience || course.meta.materials) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {course.meta.benefits && (
+            <Card><CardContent className="p-5">
+              <h3 className="font-display font-extrabold text-sm flex items-center gap-2 mb-2">🎯 What You&apos;ll Gain</h3>
+              <p className="text-sm text-foreground/60 whitespace-pre-line">{course.meta.benefits}</p>
+            </CardContent></Card>
+          )}
+          {course.meta.target_audience && (
+            <Card><CardContent className="p-5">
+              <h3 className="font-display font-extrabold text-sm flex items-center gap-2 mb-2">👥 Who This Is For</h3>
+              <p className="text-sm text-foreground/60 whitespace-pre-line">{course.meta.target_audience}</p>
+            </CardContent></Card>
+          )}
+          {course.meta.requirements && (
+            <Card><CardContent className="p-5">
+              <h3 className="font-display font-extrabold text-sm flex items-center gap-2 mb-2">📝 Requirements</h3>
+              <p className="text-sm text-foreground/60 whitespace-pre-line">{course.meta.requirements}</p>
+            </CardContent></Card>
+          )}
+          {course.meta.materials && (
+            <Card><CardContent className="p-5">
+              <h3 className="font-display font-extrabold text-sm flex items-center gap-2 mb-2">📦 Materials Included</h3>
+              <p className="text-sm text-foreground/60 whitespace-pre-line">{course.meta.materials}</p>
+            </CardContent></Card>
+          )}
+        </div>
+      )}
 
       {/* Course Content - Sections */}
       <div className="space-y-4">
