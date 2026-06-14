@@ -21,6 +21,7 @@ export interface Profile {
   full_name: string
   display_name: string | null
   avatar_url: string | null
+  avatar_emoji: string | null
   role: UserRole
   status: AccountStatus
   date_of_birth: string | null

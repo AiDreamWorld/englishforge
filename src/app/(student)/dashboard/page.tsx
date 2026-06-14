@@ -50,7 +50,7 @@ export default function StudentDashboard() {
   if (authLoading || statsLoading) return <FullPageLoader />
 
   const displayName = profile?.display_name || profile?.full_name?.split(' ')[0] || 'Student'
-  const avatarEmoji = (profile as unknown as Record<string, unknown>)?.avatar_emoji as string || '😀'
+  const avatarEmoji = profile?.avatar_emoji || '😀'
   const xpForNextLevel = (stats?.current_level || 1) * 500
   const currentLevelXP = stats?.total_xp ? stats.total_xp % xpForNextLevel : 0
   const levelProgress = Math.round((currentLevelXP / xpForNextLevel) * 100)
