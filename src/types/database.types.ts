@@ -90,6 +90,8 @@ export interface Lesson {
   description: string | null
   content: string | null
   lesson_type: string | null
+  section_title: string | null
+  section_order: number
   video_url: string | null
   audio_url: string | null
   attachments: Record<string, unknown>[]
