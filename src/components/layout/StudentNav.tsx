@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, BookOpen, Map, Trophy, Medal,
-  User, LogOut, Flame, Gamepad2
+  User, LogOut, Flame, Gamepad2, Crown
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { useAuth } from '@/hooks/useAuth'
@@ -16,6 +16,7 @@ const navItems = [
   { href: '/levels', label: 'Levels', icon: Map },
   { href: '/achievements', label: 'Achievements', icon: Trophy },
   { href: '/leaderboard', label: 'Leaderboard', icon: Medal },
+  { href: '/subscribe', label: 'Subscribe', icon: Crown },
   { href: '/profile', label: 'Profile', icon: User },
 ]
 

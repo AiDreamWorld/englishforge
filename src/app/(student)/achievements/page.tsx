@@ -2,14 +2,25 @@
 
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Trophy, Award, Flame, Star, Target } from 'lucide-react'
+import { Trophy, Award, Flame, Star, Target, Sparkles, Crown, Gem } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { useAuth } from '@/hooks/useAuth'
 import { useStudent } from '@/hooks/useStudent'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge as BadgeUI } from '@/components/ui/badge'
 import { FullPageLoader } from '@/components/shared/LoadingSpinner'
 import type { Badge } from '@/types/database.types'
+
+const rarityConfig: Record<string, { bg: string; border: string; icon: string; glow: string }> = {
+  common: { bg: 'from-gray-100 to-slate-100', border: 'border-gray-200', icon: '🥉', glow: '' },
+  rare: { bg: 'from-blue-100 to-cyan-100', border: 'border-blue-200', icon: '🥈', glow: 'shadow-blue-200/50' },
+  epic: { bg: 'from-purple-100 to-fuchsia-100', border: 'border-purple-200', icon: '🥇', glow: 'shadow-purple-200/50' },
+  legendary: { bg: 'from-amber-100 via-yellow-100 to-orange-100', border: 'border-amber-300', icon: '💎', glow: 'shadow-amber-200/60' },
+}
+
+const categoryIcons: Record<string, string> = {
+  general: '🎯', streak: '🔥', level: '📈', quiz: '🧩', skill: '💪', special: '🌟', other: '✨',
+}
 
 export default function AchievementsPage() {
   const { user } = useAuth()
@@ -38,67 +49,99 @@ export default function AchievementsPage() {
   const categories = [...new Set(allBadges.map((b) => b.category || 'other'))]
   const earnedCount = earnedIds.size
   const totalCount = allBadges.length
+  const progress = totalCount > 0 ? Math.round((earnedCount / totalCount) * 100) : 0
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-display font-extrabold text-text-primary">Achievements</h1>
-        <p className="text-text-secondary mt-1">
-          You&apos;ve earned {earnedCount} of {totalCount} badges. Keep going!
-        </p>
+      {/* Hero Header */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 p-8 text-white">
+        <div className="absolute top-2 right-4 text-[100px] leading-none opacity-20">🏆</div>
+        <div className="relative z-10">
+          <h1 className="text-4xl font-display font-extrabold flex items-center gap-3">
+            🏆 Achievements
+          </h1>
+          <p className="text-white/80 mt-2 text-lg">
+            You&apos;ve earned {earnedCount} of {totalCount} badges — keep collecting! 🎉
+          </p>
+          <div className="mt-4 bg-white/20 rounded-full h-4 overflow-hidden max-w-md">
+            <motion.div
+              className="h-full bg-gradient-to-r from-yellow-300 to-amber-300 rounded-full"
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 1.5 }}
+            />
+          </div>
+          <p className="text-sm text-white/60 mt-1">{progress}% complete</p>
+        </div>
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Badges Earned', value: earnedCount, icon: Award, color: 'text-primary' },
-          { label: 'Current Streak', value: `${stats?.streak_days || 0}d`, icon: Flame, color: 'text-secondary' },
-          { label: 'Longest Streak', value: `${stats?.longest_streak || 0}d`, icon: Target, color: 'text-success' },
-          { label: 'Total XP', value: (stats?.total_xp || 0).toLocaleString(), icon: Star, color: 'text-accent' },
+          { label: 'Badges Earned', value: earnedCount, emoji: '🏅', bg: 'from-purple-100 to-indigo-100', color: 'text-purple-700' },
+          { label: 'Current Streak', value: `${stats?.streak_days || 0}d`, emoji: '🔥', bg: 'from-orange-100 to-red-100', color: 'text-orange-700' },
+          { label: 'Longest Streak', value: `${stats?.longest_streak || 0}d`, emoji: '⚡', bg: 'from-amber-100 to-yellow-100', color: 'text-amber-700' },
+          { label: 'Total XP', value: (stats?.total_xp || 0).toLocaleString(), emoji: '💫', bg: 'from-blue-100 to-cyan-100', color: 'text-blue-700' },
         ].map((stat) => (
-          <Card key={stat.label}>
-            <CardContent className="p-5 flex items-center gap-3">
-              <stat.icon className={`h-8 w-8 ${stat.color}`} />
-              <div>
-                <p className="text-2xl font-mono font-extrabold text-text-primary">{stat.value}</p>
-                <p className="text-xs text-text-secondary">{stat.label}</p>
-              </div>
-            </CardContent>
-          </Card>
+          <motion.div key={stat.label} whileHover={{ scale: 1.03 }} transition={{ type: 'spring', stiffness: 300 }}>
+            <Card className="overflow-hidden border-2 border-transparent hover:border-primary/10">
+              <CardContent className={`p-5 bg-gradient-to-br ${stat.bg}`}>
+                <div className="text-3xl mb-2">{stat.emoji}</div>
+                <p className={`text-2xl font-mono font-extrabold ${stat.color}`}>{stat.value}</p>
+                <p className="text-xs text-foreground/50 font-bold mt-1">{stat.label}</p>
+              </CardContent>
+            </Card>
+          </motion.div>
         ))}
       </div>
 
       {/* Badge Grid by Category */}
       {categories.map((category) => {
         const categoryBadges = allBadges.filter((b) => (b.category || 'other') === category)
+        const categoryEarned = categoryBadges.filter(b => earnedIds.has(b.id)).length
         return (
           <div key={category}>
-            <h2 className="text-xl font-display font-bold text-text-primary capitalize mb-4">
-              {category} Badges
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-display font-extrabold flex items-center gap-2">
+                {categoryIcons[category] || '✨'} {category} Badges
+              </h2>
+              <span className="text-sm font-bold text-foreground/40">
+                {categoryEarned}/{categoryBadges.length} earned
+              </span>
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {categoryBadges.map((badge, i) => {
                 const isEarned = earnedIds.has(badge.id)
+                const rarity = rarityConfig[badge.rarity] || rarityConfig.common
                 return (
                   <motion.div
                     key={badge.id}
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: i * 0.03 }}
+                    whileHover={isEarned ? { scale: 1.05, rotate: 1 } : {}}
                   >
-                    <Card className={`text-center ${!isEarned ? 'opacity-40 grayscale' : ''}`}>
-                      <CardContent className="p-5">
-                        <div className="mx-auto h-16 w-16 rounded-full bg-gradient-to-br from-primary/20 to-info/20 flex items-center justify-center mb-3">
-                          <Trophy className="h-8 w-8 text-primary" />
+                    <Card className={`text-center overflow-hidden border-2 transition-all duration-300 ${
+                      isEarned
+                        ? `${rarity.border} shadow-lg ${rarity.glow}`
+                        : 'opacity-40 grayscale border-border'
+                    }`}>
+                      <CardContent className={`p-5 ${isEarned ? `bg-gradient-to-br ${rarity.bg}` : ''}`}>
+                        <div className={`mx-auto h-20 w-20 rounded-2xl flex items-center justify-center mb-3 ${
+                          isEarned
+                            ? 'bg-white/80 shadow-inner'
+                            : 'bg-gray-100'
+                        }`}>
+                          <span className="text-4xl">{rarity.icon}</span>
                         </div>
-                        <h3 className="font-display font-bold text-text-primary text-sm">{badge.name}</h3>
-                        <p className="text-xs text-text-secondary mt-1">{badge.description}</p>
+                        <h3 className="font-display font-extrabold text-sm">{badge.name}</h3>
+                        <p className="text-xs text-foreground/50 mt-1 line-clamp-2">{badge.description}</p>
                         <BadgeUI
                           variant={badge.rarity === 'legendary' ? 'accent' : badge.rarity === 'epic' ? 'primary' : badge.rarity === 'rare' ? 'info' : 'outline'}
                           size="sm"
                           className="mt-2"
                         >
-                          {badge.rarity}
+                          {isEarned ? '✅ ' : '🔒 '}{badge.rarity}
                         </BadgeUI>
                       </CardContent>
                     </Card>
@@ -109,6 +152,14 @@ export default function AchievementsPage() {
           </div>
         )
       })}
+
+      {allBadges.length === 0 && (
+        <div className="text-center py-16">
+          <div className="text-8xl mb-4">🎖️</div>
+          <h2 className="text-2xl font-display font-extrabold text-foreground/70">No badges created yet</h2>
+          <p className="text-foreground/50 mt-2">Badges will appear here once your admin sets them up!</p>
+        </div>
+      )}
     </div>
   )
 }

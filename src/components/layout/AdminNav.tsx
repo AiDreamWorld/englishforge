@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Users, GraduationCap, BookOpen,
   CreditCard, Crown, BarChart3, Award, Layers, Settings,
-  LogOut, Shield
+  LogOut, Shield, Building2
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { useAuth } from '@/hooks/useAuth'
@@ -17,6 +17,7 @@ const navItems = [
   { href: '/admin/teachers', label: 'Teachers', icon: GraduationCap },
   { href: '/admin/courses', label: 'Courses', icon: BookOpen },
   { href: '/admin/payments', label: 'Payments', icon: CreditCard },
+  { href: '/admin/payment-gateways', label: 'Payment Gateways', icon: Building2 },
   { href: '/admin/subscriptions', label: 'Subscriptions', icon: Crown },
   { href: '/admin/reports', label: 'AI Reports', icon: BarChart3 },
   { href: '/admin/badges', label: 'Badges', icon: Award },
