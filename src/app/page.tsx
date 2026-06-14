@@ -6,7 +6,7 @@ import {
   Gamepad2, Star, BookOpen, Brain, Video, Users, Globe, Shield,
   Sparkles, Trophy, ChevronDown, ArrowRight, Check, Zap, Award,
   BarChart3, Headphones, MessageCircle, GraduationCap, Heart,
-  Mail, Phone, MapPin, Facebook, Instagram, Play, Twitter
+  Mail, Phone, MapPin, Globe2, Camera, Play, MessageSquare
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -575,16 +575,16 @@ export default function LandingPage() {
               </p>
               <div className="flex items-center gap-3 mt-4">
                 <a href="#" className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
-                  <Facebook className="h-4 w-4" />
+                  <Globe2 className="h-4 w-4" />
                 </a>
                 <a href="#" className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
-                  <Instagram className="h-4 w-4" />
+                  <Camera className="h-4 w-4" />
                 </a>
                 <a href="#" className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
                   <Play className="h-4 w-4" />
                 </a>
                 <a href="#" className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors">
-                  <Twitter className="h-4 w-4" />
+                  <MessageSquare className="h-4 w-4" />
                 </a>
               </div>
             </div>
