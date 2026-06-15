@@ -1,16 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Sparkles, Loader2, FileText, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function NewCoursePage() {
   const router = useRouter()
+  const pdfInputRef = useRef<HTMLInputElement>(null)
   const [saving, setSaving] = useState(false)
+  const [pdfUploading, setPdfUploading] = useState(false)
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -43,16 +46,84 @@ export default function NewCoursePage() {
       status: 'draft',
     }).select().single()
 
-    if (error) { toast.error('Failed to create course'); setSaving(false); return }
+    if (error) {
+      console.error('Create course error:', error)
+      toast.error('Failed to create course: ' + error.message)
+      setSaving(false)
+      return
+    }
     toast.success('Course created! Opening Course Builder...')
     router.push(`/teacher/courses/${data.id}/edit`)
   }
 
+  const handlePdfUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.type !== 'application/pdf') { toast.error('Please upload a PDF file'); return }
+    if (file.size > 20 * 1024 * 1024) { toast.error('PDF must be under 20MB'); return }
+
+    setPdfUploading(true)
+    toast.info('🤖 Sending PDF to Claude AI... This may take 30-60 seconds.')
+
+    try {
+      const formData = new FormData()
+      formData.append('pdf', file)
+
+      const res = await fetch('/api/ai/pdf-to-course', { method: 'POST', body: formData })
+      const data = await res.json()
+
+      if (!res.ok) {
+        console.error('PDF API error:', data)
+        toast.error(data.error || 'Failed to process PDF')
+        setPdfUploading(false)
+        return
+      }
+
+      toast.success(`🎉 ${data.message}`)
+      router.push(`/teacher/courses/${data.courseId}/edit`)
+    } catch (err) {
+      console.error('PDF upload failed:', err)
+      toast.error('Failed to upload PDF')
+    }
+    setPdfUploading(false)
+    if (pdfInputRef.current) pdfInputRef.current.value = ''
+  }
+
   return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold font-display mb-6">Create New Course</h1>
+    <div className="p-6 max-w-2xl mx-auto space-y-6">
+      <h1 className="text-2xl font-bold font-display">✨ Create New Course</h1>
+
+      {/* AI PDF Import */}
+      <Card className="border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50">
+        <CardContent className="p-6 text-center space-y-3">
+          <div className="text-5xl">🤖</div>
+          <h3 className="text-lg font-display font-extrabold">AI-Powered Course Creation</h3>
+          <p className="text-sm text-foreground/60 max-w-md mx-auto">
+            Upload any PDF and Claude AI will automatically convert it into a full course with sections, lessons, labs, quizzes, and resources!
+          </p>
+          <label className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold cursor-pointer transition-all ${
+            pdfUploading
+              ? 'bg-purple-200 text-purple-400 cursor-wait'
+              : 'bg-gradient-to-r from-purple-500 to-pink-600 text-white hover:opacity-90'
+          }`}>
+            {pdfUploading ? <Loader2 size={18} className="animate-spin" /> : <Upload size={18} />}
+            {pdfUploading ? 'AI is processing your PDF...' : 'Upload PDF & Auto-Generate Course'}
+            <input ref={pdfInputRef} type="file" accept=".pdf" className="hidden" onChange={handlePdfUpload} disabled={pdfUploading} />
+          </label>
+          <p className="text-xs text-foreground/40">Supports PDF files up to 20MB • Works with any educational content</p>
+        </CardContent>
+      </Card>
+
+      {/* Divider */}
+      <div className="flex items-center gap-4">
+        <div className="flex-1 h-px bg-border" />
+        <span className="text-sm text-foreground/40 font-bold">OR CREATE MANUALLY</span>
+        <div className="flex-1 h-px bg-border" />
+      </div>
+
+      {/* Manual Creation */}
       <Card>
-        <CardHeader><CardTitle>Course Details</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="flex items-center gap-2"><FileText size={18} /> Course Details</CardTitle></CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input label="Course Title" value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} required />
@@ -63,6 +134,7 @@ export default function NewCoursePage() {
                 rows={4}
                 value={form.description}
                 onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
+                placeholder="What will students learn in this course?"
               />
             </div>
             <Input label="Skills (comma-separated)" value={form.skills} onChange={e => setForm(p => ({ ...p, skills: e.target.value }))} placeholder="grammar, vocabulary, reading" />
@@ -83,7 +155,7 @@ export default function NewCoursePage() {
               <Input label="Price (PKR)" type="number" value={form.price} onChange={e => setForm(p => ({ ...p, price: Number(e.target.value) }))} />
             )}
             <div className="flex gap-3 pt-2">
-              <Button type="submit" disabled={saving}>{saving ? 'Creating...' : 'Create Course'}</Button>
+              <Button type="submit" disabled={saving}>{saving ? 'Creating...' : 'Create & Open Builder'}</Button>
               <Button type="button" variant="outline" onClick={() => router.back()}>Cancel</Button>
             </div>
           </form>

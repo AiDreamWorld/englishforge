@@ -102,11 +102,11 @@ BEGIN
    'lab', 'Section 4: Build & Write', 4, 19, 45, 50, false, 'published'),
 
   -- SECTION 5: Resources
-  (v_course_id, 'Character Profile Card Template', 'Downloadable template.', 'resource', 'Resources & Cheat Sheets', 5, 20, 0, 5, false, 'published'),
-  (v_course_id, 'The Five Methods Quick Reference', 'Quick reference card.', 'resource', 'Resources & Cheat Sheets', 5, 21, 0, 5, false, 'published'),
-  (v_course_id, 'Voice Elements Checklist', 'Checklist for character voice.', 'resource', 'Resources & Cheat Sheets', 5, 22, 0, 5, false, 'published'),
-  (v_course_id, 'Arc Types at a Glance', 'Visual reference for arc types.', 'resource', 'Resources & Cheat Sheets', 5, 23, 0, 5, false, 'published'),
-  (v_course_id, 'Show vs Tell Examples', '20 weak vs strong sentence examples.', 'resource', 'Resources & Cheat Sheets', 5, 24, 0, 5, false, 'published');
+  (v_course_id, 'Character Profile Card Template', 'Downloadable template.', NULL, 'resource', 'Resources & Cheat Sheets', 5, 20, 0, 5, false, 'published'),
+  (v_course_id, 'The Five Methods Quick Reference', 'Quick reference card.', NULL, 'resource', 'Resources & Cheat Sheets', 5, 21, 0, 5, false, 'published'),
+  (v_course_id, 'Voice Elements Checklist', 'Checklist for character voice.', NULL, 'resource', 'Resources & Cheat Sheets', 5, 22, 0, 5, false, 'published'),
+  (v_course_id, 'Arc Types at a Glance', 'Visual reference for arc types.', NULL, 'resource', 'Resources & Cheat Sheets', 5, 23, 0, 5, false, 'published'),
+  (v_course_id, 'Show vs Tell Examples', '20 weak vs strong sentence examples.', NULL, 'resource', 'Resources & Cheat Sheets', 5, 24, 0, 5, false, 'published');
 
   UPDATE courses SET total_lessons = 24 WHERE id = v_course_id;
   RAISE NOTICE 'Sample course seeded with 24 items!';

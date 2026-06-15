@@ -48,18 +48,30 @@ RESPOND WITH VALID JSON ONLY. No markdown, no explanation. Just the JSON object:
 }`
 
 export async function POST(request: Request) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  let supabase;
+  try {
+    supabase = await createClient()
+  } catch {
+    return NextResponse.json({ error: 'Failed to create Supabase client' }, { status: 500 })
+  }
 
-  const { data: profile } = await supabase
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Unauthorized - please log in', details: authError?.message }, { status: 401 })
+  }
+
+  const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('role')
     .eq('id', user.id)
     .single()
 
-  if (!profile || !['admin', 'super_admin', 'teacher'].includes(profile.role)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  if (profileError || !profile) {
+    return NextResponse.json({ error: 'Profile not found', details: profileError?.message, userId: user.id }, { status: 403 })
+  }
+
+  if (!['admin', 'super_admin', 'teacher'].includes(profile.role)) {
+    return NextResponse.json({ error: `Forbidden - role "${profile.role}" cannot create courses`, role: profile.role }, { status: 403 })
   }
 
   try {

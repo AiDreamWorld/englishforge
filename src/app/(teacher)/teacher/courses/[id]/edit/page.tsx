@@ -195,7 +195,7 @@ export default function EditCoursePage() {
   const addLessonToSection = async (sectionTitle: string, sectionOrder: number) => {
     const supabase = createClient()
     const totalMax = lessons.length > 0 ? Math.max(...lessons.map(l => l.order_index)) + 1 : 1
-    const { data } = await supabase.from('lessons').insert({
+    const { data, error } = await supabase.from('lessons').insert({
       course_id: params.id,
       title: 'New Item',
       section_title: sectionTitle,
@@ -206,6 +206,11 @@ export default function EditCoursePage() {
       duration_minutes: 10,
       status: 'draft',
     }).select().single()
+    if (error) {
+      console.error('Insert lesson error:', error)
+      toast.error('Failed to add item: ' + error.message)
+      return
+    }
     if (data) {
       setLessons(prev => [...prev, data as LessonItem])
       setEditingLesson(data.id)
