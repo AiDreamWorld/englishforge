@@ -32,7 +32,7 @@ export async function updateSession(request: NextRequest) {
   // Public routes
   const publicRoutes = ['/', '/login', '/register', '/forgot-password']
   const isPublicRoute = publicRoutes.some(
-    (route) => pathname === route || pathname.startsWith('/api/auth')
+    (route) => pathname === route || pathname.startsWith('/api/')
   )
 
   if (!user && !isPublicRoute) {
