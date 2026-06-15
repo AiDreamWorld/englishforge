@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 
 const SYSTEM_PROMPT = `You are an expert curriculum designer for EnglishForge, a children's English learning platform.
 
@@ -60,7 +61,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized - please log in', details: authError?.message }, { status: 401 })
   }
 
-  const { data: profile, error: profileError } = await supabase
+  // Use service role to bypass RLS infinite recursion on profiles table
+  const serviceClient = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+
+  const { data: profile, error: profileError } = await serviceClient
     .from('profiles')
     .select('role')
     .eq('id', user.id)
@@ -146,7 +153,7 @@ export async function POST(request: Request) {
     const totalDuration = courseData.sections.reduce((s: number, sec: { items: { duration_minutes: number }[] }) =>
       s + sec.items.reduce((s2: number, item: { duration_minutes: number }) => s2 + (item.duration_minutes || 0), 0), 0)
 
-    const { data: course, error: courseError } = await supabase.from('courses').insert({
+    const { data: course, error: courseError } = await serviceClient.from('courses').insert({
       title: courseData.title,
       slug,
       description: courseData.description,
@@ -188,7 +195,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const { error: lessonsError } = await supabase.from('lessons').insert(lessonInserts)
+    const { error: lessonsError } = await serviceClient.from('lessons').insert(lessonInserts)
 
     if (lessonsError) {
       return NextResponse.json({ error: 'Course created but lessons failed', courseId: course.id, details: lessonsError.message }, { status: 500 })
