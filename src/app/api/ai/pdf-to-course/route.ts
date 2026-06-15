@@ -85,25 +85,15 @@ export async function POST(request: Request) {
     const formData = await request.formData()
     const file = formData.get('pdf') as File | null
     if (!file) return NextResponse.json({ error: 'No PDF file provided' }, { status: 400 })
+    if (file.size > 20 * 1024 * 1024) return NextResponse.json({ error: 'PDF must be under 20MB' }, { status: 400 })
 
     const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const pdfParse = require('pdf-parse') as (buf: Buffer) => Promise<{ text: string; numpages: number }>
-    const pdfData = await pdfParse(buffer)
-    const pdfText = pdfData.text
-
-    if (!pdfText || pdfText.trim().length < 100) {
-      return NextResponse.json({ error: 'PDF has too little text content' }, { status: 400 })
-    }
-
-    // Truncate to ~60k chars to stay within Claude's context
-    const truncatedText = pdfText.slice(0, 60000)
+    const base64 = Buffer.from(bytes).toString('base64')
 
     const apiKey = process.env.ANTHROPIC_API_KEY
     if (!apiKey) return NextResponse.json({ error: 'ANTHROPIC_API_KEY not configured' }, { status: 500 })
 
+    // Send PDF directly to Claude — it can read PDFs natively
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -117,7 +107,16 @@ export async function POST(request: Request) {
         system: SYSTEM_PROMPT,
         messages: [{
           role: 'user',
-          content: `Convert this PDF content into a structured course. The PDF has ${pdfData.numpages} pages.\n\n--- PDF CONTENT START ---\n${truncatedText}\n--- PDF CONTENT END ---`,
+          content: [
+            {
+              type: 'document',
+              source: { type: 'base64', media_type: 'application/pdf', data: base64 },
+            },
+            {
+              type: 'text',
+              text: 'Convert this entire PDF into a structured course. Read every page carefully and create sections, lessons, labs, quizzes, and resources from the content.',
+            },
+          ],
         }],
       }),
     })
